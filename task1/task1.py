@@ -3,22 +3,24 @@
 # Using Apriori Algorithm for Disease-Symptom Dataset
 # -----------------------------------------------
 
-import pandas as pd
 import re
+
+import pandas as pd
 from mlxtend.frequent_patterns import apriori, association_rules
 from mlxtend.preprocessing import TransactionEncoder
 
-#Load the dataset
+# Load the dataset
 df = pd.read_csv(r"C:\Users\13248\Desktop\4020 project2\Dataset.csv")
 print("Original dataset preview:")
 print(df.head())
 
-#Data Cleaning - normalize column names and text
+# Data Cleaning - normalize column names and text
 # Strip column names
 df.columns = [c.strip() for c in df.columns]
 
 # Identify all symptom columns (Symptom_1 ... Symptom_17)
-symptom_cols = [c for c in df.columns if 'symptom' in c.lower()]
+symptom_cols = [c for c in df.columns if "symptom" in c.lower()]
+
 
 def normalize_symptom_name(s: str) -> str:
     """
@@ -48,7 +50,6 @@ def normalize_symptom_name(s: str) -> str:
         # unify abdominal / belly / stomach pain
         "belly_pain": "abdominal_pain",
         "stomach_pain": "abdominal_pain",
-
         # minor typos / spacing normalization
         "foul_smell_of_urine": "foul_smell_of_urine",
         "spotting_urination": "spotting_urination",
@@ -71,6 +72,7 @@ def normalize_symptom_name(s: str) -> str:
 
     return s
 
+
 # apply cleaning to every symptom column
 for c in symptom_cols:
     df[c] = df[c].astype(str).apply(normalize_symptom_name)
@@ -83,7 +85,8 @@ print(df.head())
 transactions = []
 for _, row in df.iterrows():
     symptoms = [
-        s for s in row[symptom_cols].tolist()
+        s
+        for s in row[symptom_cols].tolist()
         if s != ""  # drop blanks
     ]
     # deduplicate symptoms inside the same disease record
@@ -104,23 +107,23 @@ df_encoded = pd.DataFrame(te_array, columns=te.columns_)
 print("\nMatrix shape:", df_encoded.shape)
 print(df_encoded.head())
 
-#Frequent Itemset Mining using Apriori
+# Frequent Itemset Mining using Apriori
 # min_support = 0.05 means the combination appears in at least 5% of the diseases
 frequent_itemsets = apriori(df_encoded, min_support=0.05, use_colnames=True)
-frequent_itemsets = frequent_itemsets.sort_values(by='support', ascending=False)
+frequent_itemsets = frequent_itemsets.sort_values(by="support", ascending=False)
 
 print("\n Top 10 Frequent Symptom Combinations:")
 print(frequent_itemsets.head(10))
 
 # Generate Association Rules
 # Rules represent relationships between symptoms (e.g. A → B)
-rules = association_rules(frequent_itemsets, metric='confidence', min_threshold=0.5)
-rules = rules.sort_values(by=['lift', 'confidence'], ascending=[False, False])
+rules = association_rules(frequent_itemsets, metric="confidence", min_threshold=0.5)
+rules = rules.sort_values(by=["lift", "confidence"], ascending=[False, False])
 
 print("\n Top 10 Association Rules:")
-print(rules[['antecedents', 'consequents', 'support', 'confidence', 'lift']].head(10))
+print(rules[["antecedents", "consequents", "support", "confidence", "lift"]].head(10))
 
-#Save the results
-frequent_itemsets.to_csv('frequent_symptom_sets.csv', index=False)
-rules.to_csv('association_rules.csv', index=False)
+# Save the results
+frequent_itemsets.to_csv("frequent_symptom_sets.csv", index=False)
+rules.to_csv("association_rules.csv", index=False)
 print("\n Results exported to 'frequent_symptom_sets.csv' and 'association_rules.csv'")
