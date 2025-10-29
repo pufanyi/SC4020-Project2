@@ -8,11 +8,13 @@ import pandas as pd
 from mlxtend.frequent_patterns import apriori, association_rules
 from mlxtend.preprocessing import TransactionEncoder
 
-DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "dataset.csv"
+BASE_DIR = Path(__file__).resolve().parents[1]
+DATA_PATH = BASE_DIR / "data" / "dataset.csv"
+RESULTS_DIR = BASE_DIR / "results" / "task1"
 MIN_SUPPORT = 0.05
 CONFIDENCE_THRESHOLD = 0.5
-FREQUENT_ITEMSETS_PATH = Path("frequent_symptom_sets.csv")
-ASSOCIATION_RULES_PATH = Path("association_rules.csv")
+FREQUENT_ITEMSETS_PATH = RESULTS_DIR / "frequent_symptom_sets.csv"
+ASSOCIATION_RULES_PATH = RESULTS_DIR / "association_rules.csv"
 
 SYNONYM_MAP = {
     "belly_pain": "abdominal_pain",
@@ -90,10 +92,12 @@ def compute_association_rules(frequent_itemsets: pd.DataFrame) -> pd.DataFrame:
 
 def save_results(frequent_itemsets: pd.DataFrame, rules: pd.DataFrame) -> None:
     """Persist the itemsets and rules to disk."""
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     frequent_itemsets.to_csv(FREQUENT_ITEMSETS_PATH, index=False)
     rules.to_csv(ASSOCIATION_RULES_PATH, index=False)
     print(
-        "\n Results exported to 'frequent_symptom_sets.csv' and 'association_rules.csv'"
+        f"\n Results exported to '{FREQUENT_ITEMSETS_PATH}' "
+        f"and '{ASSOCIATION_RULES_PATH}'."
     )
 
 
